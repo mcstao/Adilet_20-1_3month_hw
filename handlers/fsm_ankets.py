@@ -2,9 +2,10 @@ from aiogram import types,Dispatcher
 from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters import Text
 from aiogram.dispatcher.filters.state import State,StatesGroup
+from keyboards.client_kb import cancel_markup
 
 
-class FSMAdmin(StatesGroup):
+class FSMAdmin(StatesGroup):  #Finite State Machine
     photo = State()
     name = State()
     age = State()
@@ -39,15 +40,45 @@ async def load_age(message: types.Message, state:FSMContext):
             await message.answer("Доступ запрещен!!")
         else:
             async with state.proxy() as data:
-                data["age"] = int(message.text)
+                data["age"] = 2022 - int(message.text)
             await FSMAdmin.next()
-            await message.answer("Какого пола?")
+            await message.answer("Какой пола?")
     except:
         await message.answer("Пиши числами")
 
+async def load_gender(message: types.Message, state:FSMContext):
+    async with state.proxy() as data:
+        data["gender"] = message.text
+    await FSMAdmin.next()
+    await message.answer("Какой регион?")
+
+async def load_region(message: types.Message, state:FSMContext):
+    async with state.proxy() as data:
+        data["region"] = message.text
+
+
+    await state.finish()
+    await message.answer("Регистрация прошла успешно!")
+
+
+async def cancel_registration(message: types.Message,state: FSMContext):
+    current_state = await state.get_state()
+    if current_state is None:
+        return
+    else:
+        await state.finish()
+        await message.answer("Регистрация отменена!!!")
+
 def register_handlers_fsmanketa(dp:Dispatcher):
+    dp.register_message_handler(cancel_registration,state="*",commands="cancel")
+    dp.register_message_handler(cancel_registration,
+                                Text(equals="cancel",ignore_case=True), state="*")
+
     dp.register_message_handler(fsm_start,commands=["reg"])
     dp.register_message_handler(load_photo,state=FSMAdmin.photo,
                                 content_types=["photo"])
     dp.register_message_handler(load_name,state=FSMAdmin.name)
-    dp.register_message_handler(load_age,state=FSMAdmin)
+    dp.register_message_handler(load_age,state=FSMAdmin.age)
+    dp.register_message_handler(load_gender,state=FSMAdmin.gender)
+    dp.register_message_handler(load_region,state=FSMAdmin.region)
+

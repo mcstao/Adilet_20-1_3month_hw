@@ -16,3 +16,11 @@ cancel_markup = ReplyKeyboardMarkup(
     one_time_keyboard=True
 
 ).add(cancel_button)
+
+gender_g = KeyboardButton("Я девушка")
+gender_b = KeyboardButton("Я парень")
+gender_u = KeyboardButton("Я незнаю")
+gender_markup = ReplyKeyboardMarkup(
+    resize_keyboard=True,
+    one_time_keyboard=True)
+gender_markup.row(gender_g, gender_b, gender_u)
